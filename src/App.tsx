@@ -45,7 +45,13 @@ const AppContent: React.FC = () => {
         <Route 
           path="/" 
           element={
-            currentUser ? <Navigate to="/app" replace /> : <LoginPage />
+            currentUser ? (
+              currentUser.email === 'yamane@potentialight.com' ? 
+                <Navigate to="/admin" replace /> : 
+                <Navigate to="/app" replace />
+            ) : (
+              <LoginPage />
+            )
           } 
         />
         

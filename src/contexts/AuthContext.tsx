@@ -34,9 +34,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      console.log('Googleログイン成功:', result.user.email);
     } catch (error) {
       console.error('Googleログインエラー:', error);
+      alert('ログインに失敗しました。もう一度お試しください。');
     }
   };
 
