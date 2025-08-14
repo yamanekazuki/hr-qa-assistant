@@ -310,6 +310,40 @@ const MainApp: React.FC = () => {
   const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
   const [userInsights, setUserInsights] = useState<string[]>([]);
 
+  // カスタムローディングアニメーションコンポーネント
+  const LoadingAnimation = () => (
+    <div className="flex flex-col items-center justify-center py-12">
+      <div className="relative">
+        {/* メインのローディングアニメーション */}
+        <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-spin">
+          <div className="absolute top-0 left-0 w-full h-full border-4 border-transparent border-t-blue-600 rounded-full animate-spin"></div>
+        </div>
+        {/* 内側の回転する要素 */}
+        <div className="absolute inset-2 w-12 h-12 border-4 border-indigo-200 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}>
+          <div className="absolute top-0 left-0 w-full h-full border-4 border-transparent border-t-indigo-600 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+        </div>
+        {/* 中心の点 */}
+        <div className="absolute inset-4 w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full animate-pulse"></div>
+      </div>
+      
+      {/* ローディングテキスト */}
+      <div className="mt-6 text-center">
+        <div className="flex items-center justify-center space-x-2 mb-2">
+          <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+          <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+          <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+        </div>
+        <p className="text-lg font-medium text-slate-700">AIが回答を生成中...</p>
+        <p className="text-sm text-slate-500 mt-1">豊富な知識ベースから最適な回答をお届けします</p>
+      </div>
+      
+      {/* プログレスバー */}
+      <div className="w-64 bg-slate-200 rounded-full h-2 mt-6 overflow-hidden">
+        <div className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full animate-pulse" style={{ width: '85%' }}></div>
+      </div>
+    </div>
+  );
+
   const handleQuestionSubmit = async (submittedQuestion: string) => {
     setIsLoading(true);
     setQuestionSearched(submittedQuestion);
@@ -370,32 +404,52 @@ const MainApp: React.FC = () => {
     await logout();
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
+    return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
       {/* ヘッダー */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white/80 backdrop-blur-md shadow-lg border-b border-slate-200/60 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">HR Q&A アシスタント</h1>
+          <div className="flex justify-between items-center h-20">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">
+                  HR Q&A Assistant
+                </h1>
+                <p className="text-xs text-slate-500 font-medium">AI-Powered HR Solutions</p>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                ようこそ、{currentUser?.displayName || currentUser?.email}さん
-              </span>
+              <div className="hidden sm:flex items-center space-x-2 bg-slate-100/80 rounded-full px-4 py-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-medium text-slate-700">
+                  ようこそ、{currentUser?.displayName || currentUser?.email}さん
+                </span>
+              </div>
               {isAdmin && (
                 <button
                   onClick={() => window.location.href = '/admin'}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg shadow-md"
                 >
-                  管理画面
+                  <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Dashboard
                 </button>
               )}
               <button
                 onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                className="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg shadow-md"
               >
-                ログアウト
+                <svg className="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Logout
               </button>
             </div>
           </div>
@@ -403,65 +457,106 @@ const MainApp: React.FC = () => {
       </header>
 
       {/* メインコンテンツ */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="mb-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">
-              人事関連の質問にお答えします
-            </h2>
-            <p className="text-gray-600">
-              人事評価、採用、労務管理など、人事に関する質問をAIが詳しくお答えします。
-            </p>
+      <main className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
+        {/* ヒーローセクション */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/50 rounded-full px-6 py-2 mb-6">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium text-blue-700">AI-Powered HR Solutions</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4 leading-tight">
+            人事関連の質問に
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"> AIが回答</span>
+          </h2>
+          <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
+            人事評価、採用、労務管理など、人事に関する質問をAIが詳しくお答えします。
+            豊富な知識ベースと最新のAI技術で、あなたの人事課題を解決します。
+          </p>
+        </div>
+
+        {/* メインカード */}
+        <div className="bg-white/80 backdrop-blur-sm shadow-2xl rounded-3xl border border-white/20 p-8 mb-8">
+          {/* 回答の詳細度選択 */}
+          <div className="mb-8">
+            <AnswerGranularitySelector
+              selectedGranularity={selectedGranularity}
+              onGranularityChange={setSelectedGranularity}
+              disabled={isLoading}
+            />
           </div>
 
-          {/* 回答の詳細度選択 */}
-          <AnswerGranularitySelector
-            selectedGranularity={selectedGranularity}
-            onGranularityChange={setSelectedGranularity}
-            disabled={isLoading}
-          />
-
           {/* 質問入力 */}
-          <QuestionInput
-            onSubmit={handleQuestionSubmit}
-            isLoading={isLoading}
-            initialQuestion={question}
-          />
+          <div className="mb-8">
+            <QuestionInput
+              onSubmit={handleQuestionSubmit}
+              isLoading={isLoading}
+              initialQuestion={question}
+            />
+          </div>
+
+          {/* ローディング状態 */}
+          {isLoading && (
+            <div className="mb-8">
+              <LoadingAnimation />
+            </div>
+          )}
 
           {/* 回答表示 */}
-          <AnswerDisplay
-            answer={answer}
-            questionSearched={questionSearched}
-          />
+          {answer && !isLoading && (
+            <div className="mb-8">
+              <AnswerDisplay
+                answer={answer}
+                questionSearched={questionSearched}
+              />
+            </div>
+          )}
 
           {/* フォローアップ質問 */}
-          <SuggestedFollowUpQuestions
-            questions={suggestedQuestions}
-            onQuestionSelect={handleQuestionSubmit}
-            isLoading={isLoading}
-          />
+          {suggestedQuestions.length > 0 && (
+            <div className="mb-8">
+              <SuggestedFollowUpQuestions
+                questions={suggestedQuestions}
+                onQuestionSelect={handleQuestionSubmit}
+                isLoading={isLoading}
+              />
+            </div>
+          )}
 
           {/* ユーザーインサイト */}
-          <UserInsightDisplay
-            insightText={userInsights}
-            isLoading={isLoading}
-          />
-
-          {/* FAQ */}
-          <div className="mt-8">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">よくある質問 (FAQ)</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              クリックすると、選択された回答粒度でAIに質問します。
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {KNOWLEDGE_BASE.map((qaItem: QAItem) => (
-                <FaqItem
-                  key={qaItem.id}
-                  qaItem={qaItem}
-                  onQuestionSelect={handleFaqSelect}
-                />
-              ))}
+          {userInsights.length > 0 && (
+            <div className="mb-8">
+              <UserInsightDisplay
+                insightText={userInsights}
+                isLoading={isLoading}
+              />
             </div>
+          )}
+        </div>
+
+        {/* FAQ セクション */}
+        <div className="bg-white/80 backdrop-blur-sm shadow-2xl rounded-3xl border border-white/20 p-8">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200/50 rounded-full px-6 py-2 mb-4">
+              <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span className="text-sm font-medium text-emerald-700">Knowledge Base</span>
+            </div>
+            <h3 className="text-3xl font-bold text-slate-800 mb-4">よくある質問 (FAQ)</h3>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              クリックすると、選択された回答粒度でAIに質問します。
+              豊富な人事知識を活用して、あなたの疑問を解決しましょう。
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {KNOWLEDGE_BASE.map((qaItem: QAItem) => (
+              <FaqItem
+                key={qaItem.id}
+                qaItem={qaItem}
+                onQuestionSelect={handleFaqSelect}
+              />
+            ))}
           </div>
         </div>
       </main>
