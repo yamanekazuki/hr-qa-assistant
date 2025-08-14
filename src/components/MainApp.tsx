@@ -49,7 +49,19 @@ const generateAnswerByGranularity = (faq: QAItem, granularity: Granularity): str
   
   switch (granularity) {
     case 'concise':
-      return `## 簡潔な回答\n\n${faq.question}\n\n**要点**: ${baseAnswer.split('\n')[0]}\n\n**キーポイント**:\n${faq.keywords.slice(0, 3).map(k => `- ${k}`).join('\n')}`;
+      return `# 簡潔な回答
+
+## 質問
+
+${faq.question}
+
+## 要点
+
+${baseAnswer.split('\n')[0]}
+
+## キーポイント
+
+${faq.keywords.slice(0, 3).map(k => `- ${k}`).join('\n')}`;
     
     case 'contextual':
       return generateContextualAnswer(faq);
@@ -66,14 +78,128 @@ const generateContextualAnswer = (faq: QAItem): string => {
   const baseAnswer = faq.answer;
   const referenceLinks = extractReferenceLinks(baseAnswer);
   
-  return `## 文脈を含めた回答\n\n**質問**: ${faq.question}\n\n**回答**:\n\n${baseAnswer}\n\n**背景と重要性**:\n${generateBackgroundContext(faq)}\n\n**実践的なポイント**:\n${generatePracticalPoints(faq)}\n\n**参考資料**:\n${referenceLinks}\n\n**次のステップ**:\n${generateNextSteps(faq)}\n\n**詳細分析**:\n${generateDetailedAnalysis(faq)}\n\n**実践事例**:\n${generatePracticalExamples(faq)}\n\n**業界動向**:\n${generateIndustryTrends(faq)}`;
+  return `# 文脈を含めた回答
+
+## 回答
+
+${baseAnswer}
+
+---
+
+## 背景と重要性
+
+${generateBackgroundContext(faq)}
+
+## 実践的なポイント
+
+${generatePracticalPoints(faq)}
+
+## 参考資料
+
+${referenceLinks}
+
+## 次のステップ
+
+${generateNextSteps(faq)}
+
+---
+
+## 詳細分析
+
+${generateDetailedAnalysis(faq)}
+
+## 実践事例
+
+${generatePracticalExamples(faq)}
+
+## 業界動向
+
+${generateIndustryTrends(faq)}`;
 };
 
 const generateDetailedAnswer = (faq: QAItem): string => {
   const baseAnswer = faq.answer;
   const referenceLinks = extractReferenceLinks(baseAnswer);
   
-  return `## 詳細な回答\n\n**質問**: ${faq.question}\n\n**カテゴリ**: ${faq.category} > ${faq.subCategory}\n\n**詳細回答**:\n\n${baseAnswer}\n\n**背景と重要性**:\n${generateBackgroundContext(faq)}\n\n**実践的なポイント**:\n${generatePracticalPoints(faq)}\n\n**具体的な施策**:\n${generateConcreteMeasures(faq)}\n\n**成功のコツ**:\n${generateSuccessTips(faq)}\n\n**よくある失敗と対策**:\n${generateCommonMistakes(faq)}\n\n**測定と改善**:\n${generateMeasurementAndImprovement(faq)}\n\n**詳細分析**:\n${generateDetailedAnalysis(faq)}\n\n**実践事例**:\n${generatePracticalExamples(faq)}\n\n**業界動向**:\n${generateIndustryTrends(faq)}\n\n**専門的な洞察**:\n${generateExpertInsights(faq)}\n\n**戦略的アプローチ**:\n${generateStrategicApproach(faq)}\n\n**リスク管理**:\n${generateRiskManagement(faq)}\n\n**長期的な視点**:\n${generateLongTermPerspective(faq)}\n\n**キーワード**: ${faq.keywords.join(', ')}\n\n**参考資料**:\n${referenceLinks}\n\n**関連トピック**:\n${generateRelatedTopics(faq)}\n\n**次のステップ**:\n${generateNextSteps(faq)}`;
+  return `# 詳細な回答
+
+## 回答
+
+${baseAnswer}
+
+---
+
+## 背景と重要性
+
+${generateBackgroundContext(faq)}
+
+## 実践的なポイント
+
+${generatePracticalPoints(faq)}
+
+## 具体的な施策
+
+${generateConcreteMeasures(faq)}
+
+## 成功のコツ
+
+${generateSuccessTips(faq)}
+
+## よくある失敗と対策
+
+${generateCommonMistakes(faq)}
+
+## 測定と改善
+
+${generateMeasurementAndImprovement(faq)}
+
+---
+
+## 詳細分析
+
+${generateDetailedAnalysis(faq)}
+
+## 実践事例
+
+${generatePracticalExamples(faq)}
+
+## 業界動向
+
+${generateIndustryTrends(faq)}
+
+## 専門的な洞察
+
+${generateExpertInsights(faq)}
+
+## 戦略的アプローチ
+
+${generateStrategicApproach(faq)}
+
+## リスク管理
+
+${generateRiskManagement(faq)}
+
+## 長期的な視点
+
+${generateLongTermPerspective(faq)}
+
+---
+
+## キーワード
+
+${faq.keywords.join(', ')}
+
+## 参考資料
+
+${referenceLinks}
+
+## 関連トピック
+
+${generateRelatedTopics(faq)}
+
+## 次のステップ
+
+${generateNextSteps(faq)}`;
 };
 
 const extractReferenceLinks = (text: string): string => {
