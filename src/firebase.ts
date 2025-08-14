@@ -12,6 +12,16 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
+// デバッグ用：設定値の確認
+console.log('Firebase設定確認:', {
+  apiKey: firebaseConfig.apiKey ? '設定済み' : '未設定',
+  authDomain: firebaseConfig.authDomain ? '設定済み' : '未設定',
+  projectId: firebaseConfig.projectId ? '設定済み' : '未設定',
+  storageBucket: firebaseConfig.storageBucket ? '設定済み' : '未設定',
+  messagingSenderId: firebaseConfig.messagingSenderId ? '設定済み' : '未設定',
+  appId: firebaseConfig.appId ? '設定済み' : '未設定'
+});
+
 // Firebase初期化
 const app = initializeApp(firebaseConfig);
 

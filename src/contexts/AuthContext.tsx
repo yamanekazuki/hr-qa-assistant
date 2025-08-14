@@ -34,11 +34,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
+      console.log('Googleログイン開始...');
       const result = await signInWithPopup(auth, provider);
       console.log('Googleログイン成功:', result.user.email);
-    } catch (error) {
-      console.error('Googleログインエラー:', error);
-      alert('ログインに失敗しました。もう一度お試しください。');
+    } catch (error: any) {
+      console.error('Googleログインエラー詳細:', error);
+      
+      // エラーの種類に応じて詳細なメッセージを表示
+      let errorMessage = 'ログインに失敗しました。';
+      
+      if (error.code === 'auth/popup-closed-by-user') {
+        errorMessage = 'ログインウィンドウが閉じられました。もう一度お試しください。';
+      } else if (error.code === 'auth/popup-blocked') {
+        errorMessage = 'ポップアップがブロックされました。ブラウザの設定を確認してください。';
+      } else if (error.code === 'auth/unauthorized-domain') {
+        errorMessage = 'このドメインからのログインが許可されていません。管理者に連絡してください。';
+      } else if (error.code === 'auth/network-request-failed') {
+        errorMessage = 'ネットワークエラーが発生しました。インターネット接続を確認してください。';
+      }
+      
+      alert(errorMessage);
     }
   };
 
