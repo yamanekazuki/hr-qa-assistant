@@ -24,7 +24,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requireAdmin?: boole
   }
 
   if (!currentUser) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   if (requireAdmin && !isAdmin) {
