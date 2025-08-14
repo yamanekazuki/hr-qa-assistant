@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import QuestionInput from './QuestionInput';
-import AnswerDisplay from './AnswerDisplay';
-import AnswerGranularitySelector, { Granularity } from './AnswerGranularitySelector';
-import SuggestedFollowUpQuestions from './SuggestedFollowUpQuestions';
-import UserInsightDisplay from './UserInsightDisplay';
-import FaqItem from './FaqItem';
-import { KNOWLEDGE_BASE } from '../constants';
-import { QAItem } from '../types';
+import QuestionInput from '../../components/QuestionInput';
+import AnswerDisplay from '../../components/AnswerDisplay';
+import AnswerGranularitySelector, { Granularity } from '../../components/AnswerGranularitySelector';
+import SuggestedFollowUpQuestions from '../../components/SuggestedFollowUpQuestions';
+import UserInsightDisplay from '../../components/UserInsightDisplay';
+import FaqItem from '../../components/FaqItem';
+import { KNOWLEDGE_BASE } from '../../constants';
+import { QAItem } from '../../types';
 
 const MainApp: React.FC = () => {
   const { currentUser, logout, isAdmin } = useAuth();
