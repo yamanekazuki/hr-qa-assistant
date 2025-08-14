@@ -24,6 +24,9 @@ const AdminPanel: React.FC = () => {
   const [questionHistory, setQuestionHistory] = useState<QuestionHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'questions' | 'analytics' | 'settings'>('dashboard');
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserName, setNewUserName] = useState('');
 
   useEffect(() => {
     // 実際の実装では、Firestoreからデータを取得
@@ -33,6 +36,25 @@ const AdminPanel: React.FC = () => {
 
   const handleLogout = async () => {
     await logout();
+  };
+
+  const handleAddUser = () => {
+    if (newUserEmail && newUserName) {
+      // 実際の実装では、Firestoreにユーザー情報を保存
+      const newUser: User = {
+        uid: Date.now().toString(),
+        email: newUserEmail,
+        displayName: newUserName,
+        lastSignInTime: '未ログイン'
+      };
+      setUsers([...users, newUser]);
+      setNewUserEmail('');
+      setNewUserName('');
+      setShowAddUserModal(false);
+      alert('ユーザーが追加されました！');
+    } else {
+      alert('メールアドレスと名前を入力してください。');
+    }
   };
 
   if (loading) {
@@ -73,12 +95,12 @@ const AdminPanel: React.FC = () => {
               <span className="text-sm text-gray-600">
                 管理者: {currentUser?.email}
               </span>
-              <a
-                href="/app"
+              <button
+                onClick={() => window.location.href = '/app'}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
               >
                 アプリに戻る
-              </a>
+              </button>
               <button
                 onClick={handleLogout}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
@@ -187,12 +209,15 @@ const AdminPanel: React.FC = () => {
 
           {activeTab === 'users' && (
             <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-medium text-gray-900">ユーザー管理</h2>
-                <button className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200">
-                  ユーザーを追加
-                </button>
-              </div>
+                             <div className="flex justify-between items-center mb-6">
+                 <h2 className="text-lg font-medium text-gray-900">ユーザー管理</h2>
+                 <button 
+                   onClick={() => setShowAddUserModal(true)}
+                   className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
+                 >
+                   ユーザーを追加
+                 </button>
+               </div>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -354,6 +379,55 @@ const AdminPanel: React.FC = () => {
           )}
         </div>
       </main>
+
+      {/* ユーザー追加モーダル */}
+      {showAddUserModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">ユーザーを追加</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  名前
+                </label>
+                <input
+                  type="text"
+                  value={newUserName}
+                  onChange={(e) => setNewUserName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="ユーザー名を入力"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  メールアドレス
+                </label>
+                <input
+                  type="email"
+                  value={newUserEmail}
+                  onChange={(e) => setNewUserEmail(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="example@company.com"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => setShowAddUserModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors duration-200"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={handleAddUser}
+                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-md transition-colors duration-200"
+              >
+                追加
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
