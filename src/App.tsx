@@ -28,7 +28,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requireAdmin?: boole
   }
 
   if (requireAdmin && !isAdmin) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/app" replace />;
   }
 
   return <>{children}</>;
@@ -36,12 +36,12 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; requireAdmin?: boole
 
 // メインアプリケーション
 const AppContent: React.FC = () => {
-  const { currentUser, isAdmin } = useAuth();
+  const { currentUser } = useAuth();
 
   return (
     <Router>
       <Routes>
-        {/* トップページ = ログインページ */}
+        {/* トップページ = ログインページ（未ログイン時のみ表示） */}
         <Route 
           path="/" 
           element={
@@ -69,7 +69,7 @@ const AppContent: React.FC = () => {
           } 
         />
         
-        {/* その他のルートはメインアプリにリダイレクト */}
+        {/* その他のルートはログインページにリダイレクト */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
