@@ -1,8 +1,80 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import QuestionInput from './QuestionInput';
+import AnswerDisplay from './AnswerDisplay';
+import AnswerGranularitySelector, { Granularity } from './AnswerGranularitySelector';
+import SuggestedFollowUpQuestions from './SuggestedFollowUpQuestions';
+import UserInsightDisplay from './UserInsightDisplay';
+import FaqItem from './FaqItem';
+import { KNOWLEDGE_BASE } from '../constants';
+import { QAItem } from '../types';
 
 const MainApp: React.FC = () => {
   const { currentUser, logout, isAdmin } = useAuth();
+  const [selectedGranularity, setSelectedGranularity] = useState<Granularity>('contextual');
+  const [question, setQuestion] = useState<string>('');
+  const [answer, setAnswer] = useState<string | null>(null);
+  const [questionSearched, setQuestionSearched] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([]);
+  const [userInsights, setUserInsights] = useState<string[]>([]);
+
+  const handleQuestionSubmit = async (submittedQuestion: string) => {
+    setIsLoading(true);
+    setQuestionSearched(submittedQuestion);
+    setAnswer(null);
+    setSuggestedQuestions([]);
+    setUserInsights([]);
+
+    try {
+      // 実際のAI API呼び出しをここに実装
+      // 現在はダミーレスポンス
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const mockAnswer = `「${submittedQuestion}」について、以下のように回答いたします：
+
+## 概要
+この質問に対する包括的な回答を提供いたします。
+
+## 詳細な説明
+選択された詳細度（${selectedGranularity}）に基づいて、適切なレベルの情報をお届けします。
+
+### ポイント1
+重要なポイントについて説明します。
+
+### ポイント2
+実践的なアドバイスを提供します。
+
+## まとめ
+この回答がお役に立てれば幸いです。`;
+
+      setAnswer(mockAnswer);
+      
+      // フォローアップ質問の生成
+      setSuggestedQuestions([
+        '関連する質問1について詳しく教えてください',
+        '実践的なアドバイスをいただけますか？',
+        '他に考慮すべき点はありますか？'
+      ]);
+
+      // ユーザーインサイトの生成
+      setUserInsights([
+        'この質問から、採用プロセスの改善に関心があることが分かります',
+        'より効果的な採用戦略について知りたいようですね'
+      ]);
+
+    } catch (error) {
+      console.error('AI回答の取得に失敗しました:', error);
+      setAnswer('申し訳ございません。回答の取得に失敗しました。もう一度お試しください。');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFaqSelect = (selectedQuestion: string) => {
+    setQuestion(selectedQuestion);
+    handleQuestionSubmit(selectedQuestion);
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -15,19 +87,19 @@ const MainApp: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">HR Q&A Assistant</h1>
+              <h1 className="text-2xl font-bold text-gray-900">HR Q&A アシスタント</h1>
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">
                 ようこそ、{currentUser?.displayName || currentUser?.email}さん
               </span>
               {isAdmin && (
-                <a
-                  href="/admin"
+                <button
+                  onClick={() => window.location.href = '/admin'}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
                 >
                   管理画面
-                </a>
+                </button>
               )}
               <button
                 onClick={handleLogout}
@@ -52,51 +124,53 @@ const MainApp: React.FC = () => {
             </p>
           </div>
 
-          {/* 質問入力フォーム */}
-          <div className="mb-6">
-            <label htmlFor="question" className="block text-sm font-medium text-gray-700 mb-2">
-              質問を入力してください
-            </label>
-            <div className="flex space-x-4">
-              <input
-                type="text"
-                id="question"
-                placeholder="例: 人事評価の方法について教えてください"
-                className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200">
-                質問する
-              </button>
-            </div>
-          </div>
+          {/* 回答の詳細度選択 */}
+          <AnswerGranularitySelector
+            selectedGranularity={selectedGranularity}
+            onGranularityChange={setSelectedGranularity}
+            disabled={isLoading}
+          />
 
-          {/* 回答表示エリア */}
-          <div className="bg-gray-50 rounded-lg p-4 min-h-[200px]">
-            <p className="text-gray-500 text-center">
-              ログインが完了しました！ここにAIの回答が表示されます。
-            </p>
-          </div>
+          {/* 質問入力 */}
+          <QuestionInput
+            onSubmit={handleQuestionSubmit}
+            isLoading={isLoading}
+            initialQuestion={question}
+          />
+
+          {/* 回答表示 */}
+          <AnswerDisplay
+            answer={answer}
+            questionSearched={questionSearched}
+          />
+
+          {/* フォローアップ質問 */}
+          <SuggestedFollowUpQuestions
+            questions={suggestedQuestions}
+            onQuestionSelect={handleQuestionSubmit}
+            isLoading={isLoading}
+          />
+
+          {/* ユーザーインサイト */}
+          <UserInsightDisplay
+            insightText={userInsights}
+            isLoading={isLoading}
+          />
 
           {/* FAQ */}
           <div className="mt-8">
             <h3 className="text-lg font-medium text-gray-900 mb-4">よくある質問 (FAQ)</h3>
-            <div className="space-y-4">
-              <div className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
-                <h4 className="font-medium text-gray-900 mb-2">
-                  人事評価の方法について教えてください
-                </h4>
-                <p className="text-sm text-gray-600">
-                  人事評価は以下の要素を考慮して行います：1) 業績評価、2) 能力評価、3) 態度評価。
-                </p>
-              </div>
-              <div className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
-                <h4 className="font-medium text-gray-900 mb-2">
-                  採用面接のポイントは？
-                </h4>
-                <p className="text-sm text-gray-600">
-                  採用面接では以下の点を重視します：1) 志望動機の明確性、2) 会社への理解度、3) スキルと経験の適合性。
-                </p>
-              </div>
+            <p className="text-sm text-gray-600 mb-4">
+              クリックすると、選択された回答粒度でAIに質問します。
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {KNOWLEDGE_BASE.map((qaItem: QAItem) => (
+                <FaqItem
+                  key={qaItem.id}
+                  qaItem={qaItem}
+                  onQuestionSelect={handleFaqSelect}
+                />
+              ))}
             </div>
           </div>
         </div>
