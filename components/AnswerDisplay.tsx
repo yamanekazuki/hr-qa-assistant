@@ -79,8 +79,9 @@ const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ answer, questionSearched 
           <span className="text-sm font-medium text-emerald-700">詳細回答</span>
         </div>
 
-        {/* マークダウンコンテンツ */}
-        <div className="prose prose-slate max-w-none 
+        {/* マークダウンコンテンツ - 薄い緑背景 */}
+        <div className="bg-gradient-to-br from-emerald-50/80 to-teal-50/60 border border-emerald-200/40 rounded-xl p-6">
+          <div className="prose prose-slate max-w-none 
                         prose-h1:text-3xl prose-h1:font-bold prose-h1:text-slate-900 prose-h1:mb-6 prose-h1:mt-8 prose-h1:border-b prose-h1:border-slate-200 prose-h1:pb-2
                         prose-h2:text-2xl prose-h2:font-bold prose-h2:text-slate-800 prose-h2:mb-4 prose-h2:mt-8 prose-h2:bg-gradient-to-r prose-h2:from-slate-50 prose-h2:to-blue-50 prose-h2:px-4 prose-h2:py-2 prose-h2:rounded-lg prose-h2:border-l-4 prose-h2:border-blue-500
                         prose-h3:text-xl prose-h3:font-semibold prose-h3:text-slate-700 prose-h3:mb-3 prose-h3:mt-6 prose-h3:bg-slate-50 prose-h3:px-3 prose-h3:py-2 prose-h3:rounded-md prose-h3:border-l-2 prose-h3:border-slate-400
@@ -93,7 +94,8 @@ const AnswerDisplay: React.FC<AnswerDisplayProps> = ({ answer, questionSearched 
                         prose-code:text-pink-600 prose-code:bg-pink-50 prose-code:px-2 prose-code:py-1 prose-code:rounded-md prose-code:font-mono prose-code:text-sm
                         prose-li:mb-2
                         prose-ul:space-y-2 prose-ol:space-y-2">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{answer}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{answer}</ReactMarkdown>
+          </div>
         </div>
       </div>
     </article>
