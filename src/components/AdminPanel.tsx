@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 interface User {
   uid: string;
@@ -20,6 +21,7 @@ interface QuestionHistory {
 
 const AdminPanel: React.FC = () => {
   const { currentUser, logout, isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [questionHistory, setQuestionHistory] = useState<QuestionHistory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,19 +29,29 @@ const AdminPanel: React.FC = () => {
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserName, setNewUserName] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
 
   useEffect(() => {
     // 実際の実装では、Firestoreからデータを取得
     // 現在はダミーデータを表示
+    const initialUsers: User[] = [
+      {
+        uid: currentUser?.uid || '1',
+        email: currentUser?.email || 'yamane@potentialight.com',
+        displayName: currentUser?.displayName || 'Kazuki Yamane',
+        lastSignInTime: '現在オンライン'
+      }
+    ];
+    setUsers(initialUsers);
     setLoading(false);
-  }, []);
+  }, [currentUser]);
 
   const handleLogout = async () => {
     await logout();
   };
 
   const handleAddUser = () => {
-    if (newUserEmail && newUserName) {
+    if (newUserEmail && newUserName && newUserPassword) {
       // 実際の実装では、Firestoreにユーザー情報を保存
       const newUser: User = {
         uid: Date.now().toString(),
@@ -50,10 +62,11 @@ const AdminPanel: React.FC = () => {
       setUsers([...users, newUser]);
       setNewUserEmail('');
       setNewUserName('');
+      setNewUserPassword('');
       setShowAddUserModal(false);
-      alert('ユーザーが追加されました！');
+      alert('ユーザーが追加されました！このユーザーはメールアドレスとパスワードでログインできます。');
     } else {
-      alert('メールアドレスと名前を入力してください。');
+      alert('名前、メールアドレス、パスワードをすべて入力してください。');
     }
   };
 
@@ -96,7 +109,7 @@ const AdminPanel: React.FC = () => {
                 管理者: {currentUser?.email}
               </span>
               <button
-                onClick={() => window.location.href = '/app'}
+                onClick={() => navigate('/app')}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200"
               >
                 アプリに戻る
@@ -237,39 +250,41 @@ const AdminPanel: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10">
-                            <div className="h-10 w-10 rounded-full bg-purple-500 flex items-center justify-center">
-                              <span className="text-white font-medium">
-                                {currentUser?.displayName?.[0] || currentUser?.email?.[0] || 'U'}
-                              </span>
+                    {users.map((user) => (
+                      <tr key={user.uid}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10">
+                              <div className="h-10 w-10 rounded-full bg-purple-500 flex items-center justify-center">
+                                <span className="text-white font-medium">
+                                  {user.displayName?.[0] || user.email?.[0] || 'U'}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">
+                                {user.displayName || '名前なし'}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {user.email}
+                              </div>
                             </div>
                           </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">
-                              {currentUser?.displayName || '名前なし'}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {currentUser?.email}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        現在オンライン
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                          管理者
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button className="text-purple-600 hover:text-purple-900 mr-3">編集</button>
-                        <button className="text-red-600 hover:text-red-900">削除</button>
-                      </td>
-                    </tr>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {user.lastSignInTime}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            {user.email === 'yamane@potentialight.com' ? '管理者' : '一般ユーザー'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button className="text-purple-600 hover:text-purple-900 mr-3">編集</button>
+                          <button className="text-red-600 hover:text-red-900">削除</button>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -408,6 +423,18 @@ const AdminPanel: React.FC = () => {
                   onChange={(e) => setNewUserEmail(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
                   placeholder="example@company.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  パスワード
+                </label>
+                <input
+                  type="password"
+                  value={newUserPassword}
+                  onChange={(e) => setNewUserPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="パスワードを入力"
                 />
               </div>
             </div>
