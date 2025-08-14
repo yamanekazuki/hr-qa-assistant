@@ -1,15 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import QuestionInput from './QuestionInput';
-import AnswerDisplay from './AnswerDisplay';
-import AnswerGranularitySelector from './AnswerGranularitySelector';
-import SuggestedFollowUpQuestions from './SuggestedFollowUpQuestions';
-import UserInsightDisplay from './UserInsightDisplay';
-import FaqItem from './FaqItem';
 
 const MainApp: React.FC = () => {
   const { currentUser, logout, isAdmin } = useAuth();
-  const [answerGranularity, setAnswerGranularity] = useState<'detailed' | 'concise'>('detailed');
 
   const handleLogout = async () => {
     await logout();
@@ -59,40 +52,51 @@ const MainApp: React.FC = () => {
             </p>
           </div>
 
-          {/* 回答の詳細度選択 */}
-          <AnswerGranularitySelector
-            granularity={answerGranularity}
-            onGranularityChange={setAnswerGranularity}
-          />
+          {/* 質問入力フォーム */}
+          <div className="mb-6">
+            <label htmlFor="question" className="block text-sm font-medium text-gray-700 mb-2">
+              質問を入力してください
+            </label>
+            <div className="flex space-x-4">
+              <input
+                type="text"
+                id="question"
+                placeholder="例: 人事評価の方法について教えてください"
+                className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors duration-200">
+                質問する
+              </button>
+            </div>
+          </div>
 
-          {/* 質問入力 */}
-          <QuestionInput />
-
-          {/* 回答表示 */}
-          <AnswerDisplay />
-
-          {/* フォローアップ質問 */}
-          <SuggestedFollowUpQuestions />
-
-          {/* ユーザーインサイト */}
-          <UserInsightDisplay />
+          {/* 回答表示エリア */}
+          <div className="bg-gray-50 rounded-lg p-4 min-h-[200px]">
+            <p className="text-gray-500 text-center">
+              ログインが完了しました！ここにAIの回答が表示されます。
+            </p>
+          </div>
 
           {/* FAQ */}
           <div className="mt-8">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">よくある質問</h3>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">よくある質問 (FAQ)</h3>
             <div className="space-y-4">
-              <FaqItem
-                question="人事評価の方法について教えてください"
-                answer="人事評価は以下の要素を考慮して行います：1) 業績評価、2) 能力評価、3) 態度評価。各要素を数値化し、総合的な評価を行います。"
-              />
-              <FaqItem
-                question="採用面接のポイントは？"
-                answer="採用面接では以下の点を重視します：1) 志望動機の明確性、2) 会社への理解度、3) スキルと経験の適合性、4) コミュニケーション能力。"
-              />
-              <FaqItem
-                question="労働時間の管理方法は？"
-                answer="労働時間管理は以下の方法で行います：1) タイムカードによる記録、2) 勤怠管理システムの活用、3) 残業時間の適切な管理、4) 健康管理との連携。"
-              />
+              <div className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                <h4 className="font-medium text-gray-900 mb-2">
+                  人事評価の方法について教えてください
+                </h4>
+                <p className="text-sm text-gray-600">
+                  人事評価は以下の要素を考慮して行います：1) 業績評価、2) 能力評価、3) 態度評価。
+                </p>
+              </div>
+              <div className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer">
+                <h4 className="font-medium text-gray-900 mb-2">
+                  採用面接のポイントは？
+                </h4>
+                <p className="text-sm text-gray-600">
+                  採用面接では以下の点を重視します：1) 志望動機の明確性、2) 会社への理解度、3) スキルと経験の適合性。
+                </p>
+              </div>
             </div>
           </div>
         </div>
