@@ -9,6 +9,127 @@ import FaqItem from '../../components/FaqItem';
 import { KNOWLEDGE_BASE } from '../../constants';
 import { QAItem } from '../../types';
 
+// AI回答生成のヘルパー関数
+const findMostRelevantFAQ = (question: string): QAItem | null => {
+  const questionLower = question.toLowerCase();
+  let bestMatch: QAItem | null = null;
+  let bestScore = 0;
+
+  KNOWLEDGE_BASE.forEach(faq => {
+    let score = 0;
+    
+    // キーワードマッチング
+    faq.keywords.forEach(keyword => {
+      if (questionLower.includes(keyword.toLowerCase())) {
+        score += 3;
+      }
+    });
+    
+    // 質問内容のマッチング
+    if (questionLower.includes(faq.question.toLowerCase())) {
+      score += 5;
+    }
+    
+    // カテゴリマッチング
+    if (questionLower.includes(faq.category.toLowerCase())) {
+      score += 2;
+    }
+    
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatch = faq;
+    }
+  });
+
+  return bestScore > 2 ? bestMatch : null;
+};
+
+const generateAnswerByGranularity = (faq: QAItem, granularity: Granularity): string => {
+  const baseAnswer = faq.answer;
+  
+  switch (granularity) {
+    case 'concise':
+      return `## 簡潔な回答\n\n${faq.question}\n\n**要点**: ${baseAnswer.split('\n')[0]}\n\n**キーポイント**:\n${faq.keywords.slice(0, 3).map(k => `- ${k}`).join('\n')}`;
+    
+    case 'contextual':
+      return `## 文脈を含めた回答\n\n**質問**: ${faq.question}\n\n**回答**:\n\n${baseAnswer}\n\n**参考資料**:\n${extractReferenceLinks(baseAnswer)}`;
+    
+    case 'detailed':
+      return `## 詳細な回答\n\n**質問**: ${faq.question}\n\n**カテゴリ**: ${faq.category} > ${faq.subCategory}\n\n**詳細回答**:\n\n${baseAnswer}\n\n**キーワード**: ${faq.keywords.join(', ')}\n\n**参考資料**:\n${extractReferenceLinks(baseAnswer)}\n\n**関連トピック**:\n${generateRelatedTopics(faq)}`;
+    
+    default:
+      return baseAnswer;
+  }
+};
+
+const extractReferenceLinks = (text: string): string => {
+  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+  const links: string[] = [];
+  let match;
+  
+  while ((match = linkRegex.exec(text)) !== null) {
+    links.push(`- [${match[1]}](${match[2]})`);
+  }
+  
+  return links.length > 0 ? links.join('\n') : '参考資料はありません';
+};
+
+const generateRelatedTopics = (faq: QAItem): string => {
+  const relatedFAQs = KNOWLEDGE_BASE.filter(item => 
+    item.category === faq.category && item.id !== faq.id
+  ).slice(0, 3);
+  
+  return relatedFAQs.map(item => `- ${item.question}`).join('\n');
+};
+
+const generateFollowUpQuestions = (faq: QAItem, originalQuestion: string): string[] => {
+  const relatedFAQs = KNOWLEDGE_BASE.filter(item => 
+    item.category === faq.category && item.id !== faq.id
+  ).slice(0, 3);
+  
+  return relatedFAQs.map(item => item.question);
+};
+
+const generateUserInsights = (faq: QAItem, question: string): string[] => {
+  const insights = [
+    `この質問から、${faq.category}分野に強い関心があることが分かります`,
+    `${faq.subCategory}について、より深く知りたいようですね`,
+    '実践的なアドバイスを求められているようですね'
+  ];
+  
+  return insights;
+};
+
+const generateFallbackAnswer = (question: string, granularity: Granularity): string => {
+  const baseAnswer = `「${question}」について、以下のように回答いたします：
+
+## 概要
+人事関連の質問について、包括的な情報を提供いたします。
+
+## 詳細な説明
+選択された詳細度（${granularity}）に基づいて、適切なレベルの情報をお届けします。
+
+### 参考情報
+当システムには以下の分野の豊富な知識ベースがあります：
+- 採用ブランディング
+- 採用広報
+- スカウト
+- 面接・面談
+- エンジニア採用
+- デザイナー採用
+
+### より具体的な質問
+より詳細な回答を得るために、以下のような具体的な質問をしていただけますでしょうか？
+- 「採用広報の具体的な方法は？」
+- 「スカウトメールの効果的な書き方は？」
+- 「採用ブランディングの進め方は？」
+
+## まとめ
+人事関連の質問について、お気軽にお聞かせください。`;
+
+  return baseAnswer;
+};
+
 const MainApp: React.FC = () => {
   const { currentUser, logout, isAdmin } = useAuth();
   const [selectedGranularity, setSelectedGranularity] = useState<Granularity>('contextual');
@@ -27,41 +148,40 @@ const MainApp: React.FC = () => {
     setUserInsights([]);
 
     try {
-      // 実際のAI API呼び出しをここに実装
-      // 現在はダミーレスポンス
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // 実際のAI回答生成ロジック
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
-      const mockAnswer = `「${submittedQuestion}」について、以下のように回答いたします：
-
-## 概要
-この質問に対する包括的な回答を提供いたします。
-
-## 詳細な説明
-選択された詳細度（${selectedGranularity}）に基づいて、適切なレベルの情報をお届けします。
-
-### ポイント1
-重要なポイントについて説明します。
-
-### ポイント2
-実践的なアドバイスを提供します。
-
-## まとめ
-この回答がお役に立てれば幸いです。`;
-
-      setAnswer(mockAnswer);
+      // 質問に最も関連するFAQを検索
+      const relevantFAQ = findMostRelevantFAQ(submittedQuestion);
       
-      // フォローアップ質問の生成
-      setSuggestedQuestions([
-        '関連する質問1について詳しく教えてください',
-        '実践的なアドバイスをいただけますか？',
-        '他に考慮すべき点はありますか？'
-      ]);
-
-      // ユーザーインサイトの生成
-      setUserInsights([
-        'この質問から、採用プロセスの改善に関心があることが分かります',
-        'より効果的な採用戦略について知りたいようですね'
-      ]);
+      if (relevantFAQ) {
+        // 詳細度に応じた回答を生成
+        const answer = generateAnswerByGranularity(relevantFAQ, selectedGranularity);
+        setAnswer(answer);
+        
+        // 関連するフォローアップ質問を生成
+        const followUpQuestions = generateFollowUpQuestions(relevantFAQ, submittedQuestion);
+        setSuggestedQuestions(followUpQuestions);
+        
+        // ユーザーインサイトを生成
+        const insights = generateUserInsights(relevantFAQ, submittedQuestion);
+        setUserInsights(insights);
+      } else {
+        // 関連するFAQが見つからない場合の回答
+        const fallbackAnswer = generateFallbackAnswer(submittedQuestion, selectedGranularity);
+        setAnswer(fallbackAnswer);
+        
+        setSuggestedQuestions([
+          '採用広報について詳しく教えてください',
+          'スカウトメールの効果的な方法は？',
+          '採用ブランディングの進め方は？'
+        ]);
+        
+        setUserInsights([
+          '人事関連の質問に積極的に関心を持たれているようですね',
+          'より具体的なアドバイスが必要でしょうか？'
+        ]);
+      }
 
     } catch (error) {
       console.error('AI回答の取得に失敗しました:', error);
