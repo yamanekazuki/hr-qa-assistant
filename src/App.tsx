@@ -41,11 +41,11 @@ const AppContent: React.FC = () => {
   return (
     <Router>
       <Routes>
-        {/* ログインページ */}
+        {/* トップページ = ログインページ */}
         <Route 
-          path="/login" 
+          path="/" 
           element={
-            currentUser ? <Navigate to="/" replace /> : <LoginPage />
+            currentUser ? <Navigate to="/app" replace /> : <LoginPage />
           } 
         />
         
@@ -61,7 +61,7 @@ const AppContent: React.FC = () => {
         
         {/* メインアプリ（ログイン済みユーザーのみ） */}
         <Route 
-          path="/" 
+          path="/app" 
           element={
             <ProtectedRoute>
               <MainApp />

@@ -49,8 +49,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // 管理者判定（簡単な例：特定のメールアドレスのみ）
-  const isAdmin = currentUser?.email === 'yamanekazuki@gmail.com'; // 実際のメールアドレスに変更してください
+  // 管理者判定（あなただけが管理者）
+  const isAdmin = currentUser?.email === 'yamane@potentialight.com';
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
